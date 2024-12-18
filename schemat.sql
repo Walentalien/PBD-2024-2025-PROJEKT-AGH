@@ -1,6 +1,23 @@
 -- TODO: Discount, Extract info about members
 
 -- PEOPLE -----------------------------------------------------------
+
+-- Table: Countries
+create table Countries (
+    CountryID INT Primary Key,
+    CountryName Nvarchar(50)
+);
+
+-- assume: Cities have unique postal code
+-- Table: Cities
+CREATE TABLE Cities (
+    CityID INT PRIMARY KEY,
+    City NVARCHAR(100) NOT NULL,
+    CountryID int NOT NULL foreign key references Countries(CountryID),
+    PostalCode NVARCHAR(20) NOT NULL
+);
+
+
 -- assume phone number like has 9 digits
 -- Table: Students
 CREATE TABLE Students (
@@ -14,19 +31,15 @@ CREATE TABLE Students (
     PhoneNumber NVARCHAR(20) NOT NULL unique check (len(PhoneNumber) = 9 and ISNUMERIC(PhoneNumber)),
 );
 
--- assume: Cities have unique postal code
--- Table: Cities
-CREATE TABLE Cities (
-    CityID INT PRIMARY KEY,
-    City NVARCHAR(100) NOT NULL,
-    CountryID int NOT NULL foreign key references Countries(CountryID),
-    PostalCode NVARCHAR(20) NOT NULL
-);
 
--- Table: Countries
-create table Countries (
-    CountryID INT Primary Key,
-    CountryName Nvarchar(50)
+
+
+
+
+-- Table: EmployeeFunctions
+CREATE TABLE EmployeeFunctions (
+  	EmployeeFunctionID INT PRIMARY KEY,
+  	EmployeeFunctionName NVARCHAR(100) not null
 );
 
 
@@ -37,17 +50,12 @@ CREATE TABLE Employees (
     SecondName NVARCHAR(50),
     LastName NVARCHAR(50) NOT NULL,
     Address NVARCHAR(255) NOT NULL,
-    CityID INt NOT NULL,
+    CityID INT NOT NULL FOREIGN KEY REFERENCES Cities(CityID),
     BirthDate DATE NOT NULL,
     HireDate DATE NOT NULL,
     Email NVARCHAR(100) NOT NULL CHECK (Email LIKE '%_@_%._%'),
     PhoneNumber NVARCHAR(20) NOT NULL unique check (len(PhoneNumber) = 9 and ISNUMERIC(PhoneNumber)),
     EmployeeFunctionID INT NOT NULL FOREIGN KEY REFERENCES EmployeeFunctions(EmployeeFunctionID)
-);
--- Table: EmployeeFunctions
-CREATE TABLE EmployeeFunctions (
-  	EmployeeFunctionID INT PRIMARY KEY,
-  	EmployeeFunctionName NVARCHAR(100) not null
 );
 
 
