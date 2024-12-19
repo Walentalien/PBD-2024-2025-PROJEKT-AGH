@@ -1,5 +1,8 @@
 -- TODO: Discount, Extract info about members
 
+
+
+
 -- PEOPLE -----------------------------------------------------------
 
 -- Table: Countries
@@ -87,7 +90,13 @@ CREATE TABLE TranslatorLanguages (
     FOREIGN KEY (LanguageID) REFERENCES Languages(LanguageID)
 );
 
+-- ROOMS -----------------------------------------------------------
 
+-- Table: Rooms
+CREATE TABLE Rooms (
+	RoomID INT PRIMARY KEY,
+  	RoomCapacity INT NOT NULL CHECK (RoomCapacity > 0)
+);
 
 -- WEBINARS -----------------------------------------------------------
 
@@ -99,7 +108,8 @@ CREATE TABLE Webinars (
     TranslatorID INT FOREIGN KEY REFERENCES Translators(TranslatorID) ON DELETE SET NULL, -- Translator is optional; if deleted, set to NULL
     WebinarTitle NVARCHAR(255) NOT NULL,
     WebinarDescription NVARCHAR(MAX), -- Optional; description is not mandatory
-    WebinarDate DATE NOT NULL,
+    WebinarDate DATETIME NOT NULL,
+	Duration TIME NOT NULL,
     WebinarPrice MONEY CHECK (WebinarPrice >= 0) NOT NULL, -- Price cannot be negative
     RecordingLink NVARCHAR(300), -- Optional; recording link may or may not be provided
     LanguageID INT NOT NULL FOREIGN KEY REFERENCES Languages(LanguageID) ON DELETE CASCADE -- Language is mandatory; if language deleted, remove related webinars
@@ -124,6 +134,7 @@ CREATE TABLE Courses (
     CourseID INT PRIMARY KEY,
     CourseTitle NVARCHAR(255) NOT NULL,
     CourseDescription NVARCHAR(MAX),
+	AdvancePaymentPrice MONEY CHECK (AdvancePaymentPrice >= 0) NOT NULL, --zaliczka bedaca czescia calej ceny
     CoursePrice MONEY CHECK (CoursePrice >= 0) NOT NULL,
     CourseSupervisorID INT NOT NULL FOREIGN KEY REFERENCES Employees(EmployeeID) ON DELETE SET NULL -- If supervisor is deleted, set to NULL,
 );
@@ -144,7 +155,8 @@ CREATE TABLE CourseModules (
     CourseID INT NOT NULL,
     LecturerID INT NOT NULL,
     ModuleTitle NVARCHAR(255) NOT NULL,
-    ModuleDate DATE NOT NULL,
+    ModuleDate DATETIME NOT NULL,
+	Duration TIME NOT NULL,
     LanguageID INT NOT NULL,
     TranslatorID INT,
     FOREIGN KEY (CourseID) REFERENCES Courses(CourseID) ON DELETE CASCADE, -- If course is deleted, remove associated modules
@@ -171,8 +183,9 @@ CREATE TABLE OnlineSynchronousModules (
 -- Table: StationaryModules
 CREATE TABLE StationaryModules (
     ModuleID INT PRIMARY KEY,
-    Room NVARCHAR(20) NOT NULL, -- Room is mandatory
-    RoomCapacity INT NOT NULL CHECK (RoomCapacity > 0), -- Room capacity must be positive
+    --Room NVARCHAR(20) NOT NULL, -- Room is mandatory
+    --RoomCapacity INT NOT NULL CHECK (RoomCapacity > 0), -- Room capacity must be positive
+	RoomID INT FOREIGN KEY REFERENCES Rooms(RoomID),
     FOREIGN KEY (ModuleID) REFERENCES CourseModules(ModuleID) ON DELETE CASCADE -- If module is deleted, remove associated stationary content
 );
 
@@ -270,7 +283,9 @@ CREATE TABLE StudyMeetings (
     LecturerID INT NOT NULL,
     MeetingTitle NVARCHAR(255) NOT NULL,
     MeetingPrice MONEY CHECK (MeetingPrice >= 0) NOT NULL,
-    MeetingDate DATE NOT NULL,
+	GuestMeetingPrice MONEY CHECK (GuestMeetingPrice >= 0) NOT NULL,
+    MeetingDate DATETIME NOT NULL,
+	Duration TIME NOT NULL,
     LanguageID INT NOT NULL,
     TranslatorID INT,
     FOREIGN KEY (SubjectID) REFERENCES Subjects(SubjectID) ON DELETE CASCADE, -- If subject is deleted, remove related meetings
@@ -309,8 +324,7 @@ CREATE TABLE OnlineSynchronousMeetings (
 -- Table: StationaryMeetings
 CREATE TABLE StationaryMeetings (
 	StudyMeetingID INT PRIMARY KEY FOREIGN KEY REFERENCES StudyMeetings(StudyMeetingID),
-  	Room NVARCHAR(20),
-  	RoomCapacity INT
+	RoomID INT FOREIGN KEY REFERENCES Rooms(RoomID),
 );
 
 
@@ -355,3 +369,7 @@ CREATE TABLE OrderedStudyMeetings (
 	ProductID INT PRIMARY KEY FOREIGN KEY REFERENCES OrderDetails(ProductID),
   	StudyMeetingID INT FOREIGN KEY REFERENCES StudyMeetings(StudyMeetingID)
 );
+
+
+
+
